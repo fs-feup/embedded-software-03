@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Formula Student FEUP02 Dashboard</title>
+  <!-- uPlot CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.24/dist/uPlot.min.css">
+  <!-- Custom styles for grid and cards -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="bg-primary text-white py-3 d-flex align-items-center justify-content-center gap-3">
+    <img src="assets/logo.svg" alt="Logo" class="logo-img">
+    <span class="header-title">Formula Student FEUP02 Dashboard</span>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <nav class="nav-tabs-bar">
+    <button class="nav-tab active" data-page="bms">BMS</button>
+    <button class="nav-tab" data-page="state-machine">State Machine</button>
+  </nav>
+
+  <div class="container-fluid">
+
+    <!-- ========== PAGE: STATE MACHINE ========== -->
+    <div id="page-state-machine" style="display: none;">
+      <!-- GRID CONTAINER -->
+      <div class="parent">
+
+      <!-- DIV 1: State Machine -->
+      <div class="div1 card shadow-sm p-3">
+        <h4 class="card-title mb-3">Autonomous Driving State Machine</h4>
+
+        <div id="fsmContainer" class="fsm-layout">
+          <!-- Left side: States -->
+          <div class="fsm-states">
+            <div id="currentState" class="mb-3">
+              <div class="text-muted small mb-1">Current State</div>
+              <div class="d-flex align-items-center gap-3">
+                <span class="state-status-dot" id="currentStateDot"></span>
+                <div class="fs-4 fw-bold" id="stateName">--</div>
+              </div>
+            </div>
+
+            <div id="previousState">
+              <div class="text-muted small mb-1">Previous State</div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="state-status-dot status-completed"></span>
+                <div class="fs-6" id="prevStateName">--</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right side: Emergency Box -->
+          <div id="emergencyBox" class="emergency-box p-3">
+            <h5 class="text-danger mb-2">Emergency</h5>
+            <p id="emergencyInfo" class="mb-0 small">No active emergency.</p>
+          </div>
+        </div>
+      </div>
+
+        <!-- DIV 2: System Status -->
+        <div class="div2 card shadow-sm p-3">
+          <h4 class="card-title">System Status</h4>
+          <div class="d-flex align-items-center gap-2">
+            <p id="systemStatus" class="fs-5 mb-0">Status: All OK</p>
+            <button id="openErrorBtn" class="dash-btn small-btn">More</button>
+          </div>
+          <p id="modeDisplay" class="fs-5 text-info">Mode: --</p>
+          <p id="lvVoltage" class="fs-5 text-success"></p>
+        </div>
+
+        <!-- DIV 3: Analog Sensors -->
+        <div class="div3 card shadow-sm p-3">
+          <h4 class="card-title mb-3">Analog Sensors</h4>
+          <div id="analogData" class="row g-3"></div>
+        </div>
+
+      <!-- DIV 4: Digital Sensors + Actuators -->
+      <div class="div4 card shadow-sm p-3">
+        <h4 class="card-title">Digital Sensors & Actuators</h4>
+
+        <div class="digital-actuator-container">
+          <!-- Left side -->
+          <div class="digital-section">
+            <h4 class="text-secondary mb-2">Digital Inputs</h4>
+            <div id="digitalData" class="d-flex flex-wrap gap-2"></div>
+          </div>
+
+          <!-- Right side -->
+          <div class="actuator-section">
+            <h4 class="text-secondary mb-2">Actuators</h4>
+            <div id="actuatorData" class="d-flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+      </div>
+
+      </div>
+
+      <!-- Analog Detail View -->
+      <div id="analogDetail" class="analog-detail hidden">
+        <button id="backBtn" class="close-btn">&times;</button>
+        <h3 class="mb-3">Analog Sensor History</h3>
+        <div id="chartsContainer" class="charts-container"></div>
+      </div>
+
+      <div id="mainButtonsContainer" class="text-center mt-4">
+        <button id="freezeBtn" class="dash-btn dash-btn-freeze me-3">
+          Freeze
+        </button>
+        <button id="viewChartsBtn" class="dash-btn dash-btn-charts me-3">
+          View Charts
+        </button>
+        <button id="saveBtn" class="dash-btn dash-btn-save">
+          Export Data
+        </button>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: BMS ========== -->
+    <div id="page-bms">
+
+      <!-- Pack Summary Bar -->
+      <div class="bms-summary card shadow-sm p-3">
+        <h4 class="card-title mb-3">Pack Summary</h4>
+        <div class="bms-summary-grid">
+          <div class="bms-stat">
+            <span class="bms-stat-label">Pack Current</span>
+            <span class="bms-stat-value" id="bmsCurrent">-- A</span>
+          </div>
+          <div class="bms-stat">
+            <span class="bms-stat-label">V min</span>
+            <span class="bms-stat-value" id="bmsVmin">-- V</span>
+          </div>
+          <div class="bms-stat">
+            <span class="bms-stat-label">V max</span>
+            <span class="bms-stat-value" id="bmsVmax">-- V</span>
+          </div>
+          <div class="bms-stat">
+            <span class="bms-stat-label">V avg</span>
+            <span class="bms-stat-value" id="bmsVavg">-- V</span>
+          </div>
+          <div class="bms-stat">
+            <span class="bms-stat-label">T min</span>
+            <span class="bms-stat-value" id="bmsTmin">-- C</span>
+          </div>
+          <div class="bms-stat">
+            <span class="bms-stat-label">T max</span>
+            <span class="bms-stat-value" id="bmsTmax">-- C</span>
+          </div>
+          <div class="bms-stat">
+            <span class="bms-stat-label">T avg</span>
+            <span class="bms-stat-value" id="bmsTavg">-- C</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voltages + Temperatures side by side -->
+      <div class="bms-data-row">
+
+        <!-- Cell Voltages -->
+        <div class="bms-section card shadow-sm p-3">
+          <div class="bms-section-header">
+            <h4 class="card-title">Cell Voltages (144)</h4>
+            <div class="bms-view-toggle">
+              <button class="dash-btn small-btn bms-toggle-btn active" data-target="voltageHeatmap">Heatmap</button>
+              <button class="dash-btn small-btn bms-toggle-btn" data-target="voltageTable">Table</button>
+            </div>
+          </div>
+          <div id="voltageHeatmap" class="bms-heatmap-container"></div>
+          <div id="voltageTable" class="bms-table-container" style="display: none;"></div>
+        </div>
+
+        <!-- Temperatures -->
+        <div class="bms-section card shadow-sm p-3">
+          <div class="bms-section-header">
+            <h4 class="card-title">Temperatures (132)</h4>
+            <div class="bms-view-toggle">
+              <button class="dash-btn small-btn bms-toggle-btn active" data-target="tempHeatmap">Heatmap</button>
+              <button class="dash-btn small-btn bms-toggle-btn" data-target="tempTable">Table</button>
+            </div>
+          </div>
+          <div id="tempHeatmap" class="bms-heatmap-container"></div>
+          <div id="tempTable" class="bms-table-container" style="display: none;"></div>
+        </div>
+
+      </div>
+
+      <!-- BMS Flags & Errors -->
+      <div class="bms-flags card shadow-sm p-3">
+        <h4 class="card-title mb-3">BMS Flags & Errors</h4>
+        <div id="bmsFlagsList" class="bms-flags-list">
+          <p class="bms-flags-empty">No flags reported.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- uPlot -->
+    <script src="https://cdn.jsdelivr.net/npm/uplot@1.6.24/dist/uPlot.iife.min.js"></script>
+
+    <!-- Error Popup -->
+    <div id="errorPopup" class="error-popup hidden">
+      <div class="error-popup-content">
+        <button id="closePopup" class="close-btn">&times;</button>
+
+        <div id="activeErrorsSection">
+          <h5>Active Errors</h5>
+          <ul id="errorList"></ul>
+        </div>
+
+        <div id="faultHistorySection" style="display: none;">
+          <h5>Fault History</h5>
+          <ul id="faultHistoryList"></ul>
+        </div>
+
+        <button id="historyBtn" class="dash-btn small-btn">Show History</button>
+      </div>
+    </div>
+
+    <!-- BMS Tooltip (shared) -->
+    <div id="bmsTooltip" class="bms-tooltip"></div>
+
+  </div>
+
+  <!-- Renderer JS -->
+  <script src="renderer.js"></script>
+  <script src="bms.js"></script>
+</body>
+</html>

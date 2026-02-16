@@ -1,0 +1,34 @@
+#pragma once
+#include <array>
+#include <cstdint>
+#include <deque>
+
+#include "data_struct.hpp"
+
+#ifdef DEBUG_PRINTS
+#define DEBUG_PRINT(x) Serial.print(x)
+#define DEBUG_PRINTLN(x) Serial.println(x)
+#else
+#define DEBUG_PRINT(x)
+#define DEBUG_PRINTLN(x)
+#endif
+
+// Add values to the front of the queue and remove from back if necessary
+void insert_value_queue(uint16_t value, std::deque<uint16_t>& queue);
+
+// Calculate the average of values in a queue
+uint16_t average_queue(const std::deque<uint16_t>& queue);
+
+// Check if data sequence matches expected pattern
+bool check_sequence(const uint8_t* data, const std::array<uint8_t, 3>& expected);
+
+/**
+ * Converts RPM float value to a 4-byte representation
+ * @param rpm The RPM value to convert
+ */
+std::array<uint8_t, 4> rpm_to_bytes(float rpm);
+
+// Print all temperature sensor data from the boards
+void print_all_board_temps(const int8_t temps[6][18]);
+
+InverterModeParams get_inverter_mode_config(SwitchMode switch_mode);

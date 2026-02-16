@@ -1,0 +1,19 @@
+{
+  "name": "FSFEUP02 Dashboard",
+  "version": "1.0.0",
+  "description": "Formula Student FEUP02 Dashboard - Displays sensor data from Master Teensy",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^38.8.0"
+  },
+  "dependencies": {
+    "serialport": "^13.0.0"
+  }
+}

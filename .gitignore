@@ -1,0 +1,44 @@
+# Node modules
+node_modules/
+package-lock.json
+
+# Build outputs
+dashboard/dist/
+dashboard/out/
+can_listener/*.exe
+can_listener/*.o
+can_listener/can_listener
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code
+.claude/
+
+# Logs
+*.log
+npm-debug.log*
+dashboard/snapshots.csv
+
+# OS
+Thumbs.db
+.DS_Store
+
+# LaTeX
+docs/*.aux
+docs/*.log
+docs/*.out
+docs/*.toc
+docs/*.pdf
+docs/*.synctex.gz
+docs/*.fdb_latexmk
+docs/*.fls
+
+# Temporary files
+*.tmp
+*.bak
+*~
+todo

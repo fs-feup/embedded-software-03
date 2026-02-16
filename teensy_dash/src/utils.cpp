@@ -1,0 +1,131 @@
+#include "utils.hpp"
+
+#include <cmath>
+#include <io_settings.hpp>
+#include <numeric>
+
+void insert_value_queue(const uint16_t value, std::deque<uint16_t> &queue) {
+  queue.push_front(value);
+
+  if (queue.size() > config::apps::SAMPLES) {
+    queue.pop_back();
+  }
+}
+
+uint16_t average_queue(const std::deque<uint16_t> &queue) {
+  uint16_t avg = 0;
+  if (!queue.empty()) {
+    const double sum = std::accumulate(queue.begin(), queue.end(), 0);
+    avg = static_cast<uint16_t>(sum / queue.size());
+  }
+  return avg;
+}
+
+void print_all_board_temps(const int8_t temps[6][18]) {
+  Serial.println("\n--- ALL NTC SENSOR DATA ---");
+
+  for (int board = 0; board < 6; board++) {
+    Serial.printf("\n=== BOARD %d ===\n", board + 1);
+
+    for (int sensor = 0; sensor < 18; sensor++) {
+      int8_t temp = temps[board][sensor];
+      Serial.printf("Sensor %2d: %3d°C\n", sensor, temp);
+    }
+  }
+}
+
+bool check_sequence(const uint8_t *data, const std::array<uint8_t, 3> &expected) {
+  return (data[1] == expected[0] && data[2] == expected[1] && data[3] == expected[2]);
+}
+
+std::array<uint8_t, 4> rpm_to_bytes(const float rpm) {
+  // Convert to integer with 2 decimal places precision
+  const auto scaled_value = static_cast<int32_t>(roundf(rpm * 100.0f));
+
+  // Return array with bytes in little-endian order
+  return {static_cast<uint8_t>(scaled_value & 0xFF),
+          static_cast<uint8_t>((scaled_value >> 8) & 0xFF),
+          static_cast<uint8_t>((scaled_value >> 16) & 0xFF),
+          static_cast<uint8_t>((scaled_value >> 24) & 0xFF)};
+}
+
+InverterModeParams get_inverter_mode_config(const SwitchMode switch_mode) {
+  InverterModeParams params{};
+  switch (switch_mode) {
+    case SwitchMode::INVERTER_MODE_SCRUT:
+      params = {.i_max_pk_percent = 11,
+                .speed_limit_percent = 11,
+                .i_cont_percent = 11,
+                .speed_ramp_acc = 1000,
+                .moment_ramp_acc = 500,
+                .speed_ramp_brake = 1000,
+                .moment_ramp_decc = 500};
+      break;
+    case SwitchMode::INVERTER_MODE_CRUISING:
+      params = {.i_max_pk_percent = 44,
+                .speed_limit_percent = 33,
+                .i_cont_percent = 22,
+                .speed_ramp_acc = 1000,
+                .moment_ramp_acc = 500,
+                .speed_ramp_brake = 1000,
+                .moment_ramp_decc = 500};
+      break;
+    case SwitchMode::INVERTER_MODE_AS_ACCELERATION:
+      params = {.i_max_pk_percent = 44,
+                .speed_limit_percent = 33,
+                .i_cont_percent = 33,
+                .speed_ramp_acc = 1000,
+                .moment_ramp_acc = 500,
+                .speed_ramp_brake = 1000,
+                .moment_ramp_decc = 500};
+      break;
+    case SwitchMode::INVERTER_MODE_SKIDPAD: //Mangueiras Skidpad
+      params = {.i_max_pk_percent = 50,
+                .speed_limit_percent = 100,
+                .i_cont_percent = 44,
+                .speed_ramp_acc = 1000,
+                .moment_ramp_acc = 500,
+                .speed_ramp_brake = 1000,
+                .moment_ramp_decc = 500};
+      break;
+    case SwitchMode::INVERTER_MODE_ENDURANCE: //Chicão Endurance
+      params = {.i_max_pk_percent = 55,
+                .speed_limit_percent = 55,
+                .i_cont_percent = 44,
+                .speed_ramp_acc = 1000,
+                .moment_ramp_acc = 500,
+                .speed_ramp_brake = 1000,
+                .moment_ramp_decc = 500};
+      break;
+    case SwitchMode::INVERTER_MODE_AUTOCROSS: //FAST ENDURANCE
+      params = {.i_max_pk_percent = 66,
+                .speed_limit_percent = 55,
+                .i_cont_percent = 44,
+                .speed_ramp_acc = 1000,
+                .moment_ramp_acc = 500,
+                .speed_ramp_brake = 500,
+                .moment_ramp_decc = 250};
+      break;
+    case SwitchMode::INVERTER_MODE_ACCELERATION: // Aceleração
+      params = {.i_max_pk_percent = 60,
+                .speed_limit_percent = 70,
+                .i_cont_percent = 44,
+                .speed_ramp_acc = 1000,
+                .moment_ramp_acc = 500,
+                .speed_ramp_brake = 1000,
+                .moment_ramp_decc = 500};
+      break;
+    case SwitchMode::INVERTER_MODE_FAST_ACCELERATION:
+      params = {.i_max_pk_percent = 55,
+                .speed_limit_percent = 75,
+                .i_cont_percent = 44,
+                .speed_ramp_acc = 1000,
+                .moment_ramp_acc = 500,
+                .speed_ramp_brake = 1000,
+                .moment_ramp_decc = 500};
+      break;
+    default:
+      break;
+  }
+  return params;
+}
