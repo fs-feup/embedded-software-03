@@ -34,17 +34,25 @@ function hideBmsTooltip() {
 
 // --- Color mapping ---
 function voltageColor(v) {
-  if (v < 2.5 || v > 4.2) return '#a72f3b';   // critical
-  if (v < 2.8 || v > 4.0) return '#d4822a';   // warning orange
-  if (v < 3.0 || v > 3.9) return '#f7c948';   // caution yellow
-  return '#288b3e';                             // ok green
+  const min = 2.5, max = 4.2;
+  if (v <= min || v >= max) return 'hsl(0, 70%, 40%)';   // red (hard jump at extremes)
+
+  // quadratic curve: stays yellow aggressively, only goes green near 4.2V
+  const t = Math.pow((v - min) / (max - min), 2);
+  const hue = Math.round(60 + t * 60); // 60° yellow → 120° green
+  return `hsl(${hue}, 75%, 38%)`;
 }
 
 function tempColor(t) {
-  if (t > 55 || t < -30) return '#a72f3b';     // critical
-  if (t > 45 || t < -10) return '#d4822a';     // warning
-  if (t > 40 || t < 0) return '#f7c948';       // caution
-  return '#288b3e';                             // ok
+  const min = -30, max = 55;
+  if (t <= min || t >= max) return 'hsl(0, 70%, 40%)';   // red (hard jump at extremes)
+
+  // blue→green→red with green at midpoint (~12.5°C)
+  const norm = (t - min) / (max - min); // 0 at -30°C, 1 at 55°C
+  const hue = norm < 0.5
+    ? 240 - norm * 2 * 120   // 240° blue → 120° green
+    : 120 - (norm - 0.5) * 2 * 120; // 120° green → 0° red
+  return `hsl(${Math.round(hue)}, 70%, 38%)`;
 }
 
 // --- Render heatmap grid ---
@@ -124,6 +132,8 @@ function renderTable(containerId, values, perRow, stacks, unit, precision) {
 
 // --- Render flags list ---
 let lastRenderedFlagCount = 0;
+let lastVoltageKey = null;
+let lastTempKey = null;
 
 function renderBmsFlags(flags) {
   const container = document.getElementById('bmsFlagsList');
@@ -269,10 +279,15 @@ function clearNoData(containerId) {
 
 // --- BMS Update Loop ---
 setInterval(() => {
-  if (!latestData || isFrozen) return;
+  if (!latestData) return;
 
   const bms = latestData.bms;
   if (!bms) return;
+
+  // Always update flags even when frozen
+  renderBmsFlags(bms.flags);
+
+  if (isFrozen) return;
 
   // Update summary stats
   updateBmsSummary(bms);
@@ -280,43 +295,48 @@ setInterval(() => {
   const hasVoltages = Array.isArray(bms.cell_voltages) && bms.cell_voltages.length > 0;
   const hasTemps = Array.isArray(bms.temperatures) && bms.temperatures.length > 0;
 
-  // Update voltage heatmap/table (only if data available)
+  // Update voltage heatmap/table (only if data changed)
   if (hasVoltages) {
     clearNoData('voltageHeatmap');
     clearNoData('voltageTable');
 
-    const voltageHeatmap = document.getElementById('voltageHeatmap');
-    if (voltageHeatmap.style.display !== 'none') {
-      renderHeatmap('voltageHeatmap', bms.cell_voltages, bms.cells_per_stack, bms.stacks, voltageColor, 'V');
-    }
-    const voltageTable = document.getElementById('voltageTable');
-    if (voltageTable.style.display !== 'none') {
-      renderTable('voltageTable', bms.cell_voltages, bms.cells_per_stack, bms.stacks, 'V', 3);
+    const voltageKey = bms.cell_voltages.join(',');
+    if (voltageKey !== lastVoltageKey) {
+      lastVoltageKey = voltageKey;
+      const voltageHeatmap = document.getElementById('voltageHeatmap');
+      if (voltageHeatmap.style.display !== 'none') {
+        renderHeatmap('voltageHeatmap', bms.cell_voltages, bms.cells_per_stack, bms.stacks, voltageColor, 'V');
+      }
+      const voltageTable = document.getElementById('voltageTable');
+      if (voltageTable.style.display !== 'none') {
+        renderTable('voltageTable', bms.cell_voltages, bms.cells_per_stack, bms.stacks, 'V', 3);
+      }
     }
   } else {
     showNoData('voltageHeatmap', 'Cell voltages not available from CAN bus');
     showNoData('voltageTable', 'Cell voltages not available from CAN bus');
   }
 
-  // Update temperature heatmap/table
+  // Update temperature heatmap/table (only if data changed)
   if (hasTemps) {
     clearNoData('tempHeatmap');
     clearNoData('tempTable');
 
-    const tempHeatmap = document.getElementById('tempHeatmap');
-    if (tempHeatmap.style.display !== 'none') {
-      renderHeatmap('tempHeatmap', bms.temperatures, bms.ntcs_per_stack, bms.stacks, tempColor, 'C');
-    }
-    const tempTable = document.getElementById('tempTable');
-    if (tempTable.style.display !== 'none') {
-      renderTable('tempTable', bms.temperatures, bms.ntcs_per_stack, bms.stacks, 'C', 1);
+    const tempKey = bms.temperatures.join(',');
+    if (tempKey !== lastTempKey) {
+      lastTempKey = tempKey;
+      const tempHeatmap = document.getElementById('tempHeatmap');
+      if (tempHeatmap.style.display !== 'none') {
+        renderHeatmap('tempHeatmap', bms.temperatures, bms.ntcs_per_stack, bms.stacks, tempColor, 'C');
+      }
+      const tempTable = document.getElementById('tempTable');
+      if (tempTable.style.display !== 'none') {
+        renderTable('tempTable', bms.temperatures, bms.ntcs_per_stack, bms.stacks, 'C', 1);
+      }
     }
   } else {
     showNoData('tempHeatmap', 'Individual temps not available — see summary above');
     showNoData('tempTable', 'Individual temps not available — see summary above');
   }
-
-  // Update flags
-  renderBmsFlags(bms.flags);
 
 }, 500);
