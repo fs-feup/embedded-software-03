@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Formula Student FEUP02 Dashboard</title>
+  <title>Formula Student FEUP03 Dashboard</title>
   <!-- uPlot CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.24/dist/uPlot.min.css">
   <!-- Custom styles for grid and cards -->
@@ -13,7 +13,7 @@
   <!-- HEADER -->
   <header class="bg-primary text-white py-3 d-flex align-items-center justify-content-center gap-3">
     <img src="assets/logo.svg" alt="Logo" class="logo-img">
-    <span class="header-title">Formula Student FEUP02 Dashboard</span>
+    <span class="header-title">Formula Student FEUP03 Dashboard</span>
   </header>
 
   <!-- NAVIGATION TABS -->
@@ -174,14 +174,26 @@
         <!-- Temperatures -->
         <div class="bms-section card shadow-sm p-3">
           <div class="bms-section-header">
-            <h4 class="card-title">Temperatures (132)</h4>
+            <h4 class="card-title">Temperatures (144)</h4>
             <div class="bms-view-toggle">
               <button class="dash-btn small-btn bms-toggle-btn active" data-target="tempHeatmap">Heatmap</button>
               <button class="dash-btn small-btn bms-toggle-btn" data-target="tempTable">Table</button>
+              <button class="dash-btn small-btn bms-toggle-btn" data-target="tempLayout">Layout</button>
             </div>
           </div>
           <div id="tempHeatmap" class="bms-heatmap-container"></div>
           <div id="tempTable" class="bms-table-container" style="display: none;"></div>
+          <div id="tempLayout" class="bms-heatmap-container" style="display: none;">
+            <div class="stack-subtabs">
+              <button class="dash-btn small-btn stack-tab active" data-stack="0">S1</button>
+              <button class="dash-btn small-btn stack-tab" data-stack="1">S2</button>
+              <button class="dash-btn small-btn stack-tab" data-stack="2">S3</button>
+              <button class="dash-btn small-btn stack-tab" data-stack="3">S4</button>
+              <button class="dash-btn small-btn stack-tab" data-stack="4">S5</button>
+              <button class="dash-btn small-btn stack-tab" data-stack="5">S6</button>
+            </div>
+            <div id="packLayoutDisplay"></div>
+          </div>
         </div>
 
       </div>

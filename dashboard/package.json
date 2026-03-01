@@ -1,7 +1,7 @@
 {
-  "name": "FSFEUP02 Dashboard",
+  "name": "FSFEUP03 Dashboard",
   "version": "1.0.0",
-  "description": "Formula Student FEUP02 Dashboard - Displays sensor data from Master Teensy",
+  "description": "Formula Student FEUP03 Dashboard - Displays sensor data from Master Teensy",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

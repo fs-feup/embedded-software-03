@@ -604,6 +604,27 @@ header h1 {
   background-color: #6b2222;
 }
 
+/* --- Stack subtabs (Layout view) --- */
+.stack-subtabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.stack-tab {
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.stack-tab.active {
+  opacity: 1;
+  background-color: #6b2222;
+}
+
+#packLayoutDisplay {
+  margin: 0 auto;
+}
+
 /* --- Heatmap --- */
 .bms-heatmap-container {
   padding: 0.5rem 0;

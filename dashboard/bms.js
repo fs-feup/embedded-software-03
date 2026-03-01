@@ -55,6 +55,82 @@ function tempColor(t) {
   return `hsl(${Math.round(hue)}, 70%, 38%)`;
 }
 
+// --- Pack layout: 12×12 staggered grid, 24 NTCs out of 144 positions ---
+// Each entry: NTC index (0-23) or null (no sensor — grey)
+// TODO: replace with actual physical positions once confirmed with hardware team
+const PACK_COLS = 12;
+// 6×12 grid = 72 positions, 24 NTC sensors + 48 grey (90° rotation of original 12×6)
+// TODO: replace with actual physical positions once confirmed with hardware team
+const PACK_NTC_MAP = [
+  0, null,  null, null, null, 1, 2, 3,  null, null, null, null,  // row 0
+  null, null,  null, 4, 5, null, null, 6,  7, null, null, null,  // row 1
+  null, 8,  9, null, null, 10, null, null,  null, 11, 12, null,  // row 3
+  13, null,  null, 14, null, null, 15, null, null, null, null, 16,  // row 4
+  null, null, 17, null, null, 18, null, null, null, 19, 20, null,  // row 5
+  null, null, null, null, 21, null, null, null, 22, null, null, 23,  // row 6
+];
+let lastLayoutTemps = null;
+let activeStackIdx = 0;
+
+document.querySelectorAll('.stack-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.stack-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeStackIdx = parseInt(btn.dataset.stack);
+    if (lastLayoutTemps) renderPackLayout(lastLayoutTemps, activeStackIdx, tempColor, 'C');
+  });
+});
+
+function renderPackLayout(temps, stackIdx, colorFn, unit) {
+  const stackTemps = temps.slice(stackIdx * 24, (stackIdx + 1) * 24);
+  const container = document.getElementById('packLayoutDisplay');
+  container.innerHTML = '';
+
+  // Absolute honeycomb positioning (rotated 90°): odd columns stagger down
+  const gap = 4;
+  const d = 36;   // fixed circle size — change this to resize all circles
+  const vPitch = d + gap;                              // full vertical spacing
+  const hPitch = vPitch * Math.sin(Math.PI / 3);      // 0.866 × vPitch (compressed columns)
+
+  const numRows = Math.ceil(PACK_NTC_MAP.length / PACK_COLS);
+  const totalH = Math.ceil((numRows - 1) * vPitch + d + vPitch / 2);
+  const totalW = Math.ceil((PACK_COLS - 1) * hPitch + d);
+  container.style.cssText = `position:relative;height:${totalH}px;width:${totalW}px;margin:0 auto;`;
+
+  for (let r = 0; r < numRows; r++) {
+    for (let c = 0; c < PACK_COLS; c++) {
+      const ntcIdx = PACK_NTC_MAP[r * PACK_COLS + c];
+      const x = c * hPitch;
+      const y = r * vPitch + (c % 2 === 1 ? vPitch / 2 : 0);
+
+      const cell = document.createElement('div');
+      cell.style.cssText = `position:absolute;left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;width:${d.toFixed(1)}px;height:${d.toFixed(1)}px;border-radius:50%;cursor:default;transition:transform 0.1s;border:2px solid rgba(255,255,255,0.15);box-sizing:border-box;`;
+
+      if (ntcIdx !== null && stackTemps[ntcIdx] !== undefined) {
+        const val = stackTemps[ntcIdx];
+        cell.style.backgroundColor = colorFn(val);
+        cell.addEventListener('mouseenter', (e) => {
+          cell.style.transform = 'scale(1.2)';
+          showBmsTooltip(e, `NTC${ntcIdx + 1}: ${val.toFixed(1)}${unit}`);
+        });
+        cell.addEventListener('mousemove', (e) => {
+          bmsTooltip.style.left = (e.pageX + 12) + 'px';
+          bmsTooltip.style.top = (e.pageY - 28) + 'px';
+        });
+        cell.addEventListener('mouseleave', () => {
+          cell.style.transform = '';
+          hideBmsTooltip();
+        });
+      } else {
+        cell.style.backgroundColor = '#2a2a2a';
+        cell.style.borderColor = '#555';
+      }
+
+      container.appendChild(cell);
+    }
+  }
+}
+
 // --- Render heatmap grid ---
 function renderHeatmap(containerId, values, perRow, stacks, colorFn, unit) {
   const container = document.getElementById(containerId);
@@ -120,7 +196,7 @@ function renderTable(containerId, values, perRow, stacks, unit, precision) {
       const idx = s * perRow + c;
       const val = values[idx];
       const td = document.createElement('td');
-      td.textContent = val.toFixed(precision);
+      td.textContent = `${val.toFixed(precision)}${unit}`;
       td.style.color = val !== undefined ? '#eee' : '#666';
       tr.appendChild(td);
     }
@@ -323,6 +399,7 @@ setInterval(() => {
     clearNoData('tempTable');
 
     const tempKey = bms.temperatures.join(',');
+    lastLayoutTemps = bms.temperatures;
     if (tempKey !== lastTempKey) {
       lastTempKey = tempKey;
       const tempHeatmap = document.getElementById('tempHeatmap');
@@ -333,10 +410,16 @@ setInterval(() => {
       if (tempTable.style.display !== 'none') {
         renderTable('tempTable', bms.temperatures, bms.ntcs_per_stack, bms.stacks, 'C', 1);
       }
+      const tempLayout = document.getElementById('tempLayout');
+      if (tempLayout.style.display !== 'none') {
+        lastLayoutTemps = bms.temperatures;
+        renderPackLayout(bms.temperatures, activeStackIdx, tempColor, 'C');
+      }
     }
   } else {
     showNoData('tempHeatmap', 'Individual temps not available — see summary above');
     showNoData('tempTable', 'Individual temps not available — see summary above');
+    showNoData('tempLayout', 'Individual temps not available — see summary above');
   }
 
 }, 500);

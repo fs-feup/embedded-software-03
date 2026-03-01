@@ -15,7 +15,7 @@ const CAN_BINARY = path.join(__dirname, '..', 'can_listener', CAN_EXE);
 // Override with environment variable: CAN_DEVICE=/dev/ttyACM0 npm start
 const CAN_DEVICE = process.env.CAN_DEVICE || (() => {
   switch (process.platform) {
-    case 'win32':  return 'COM3';                      // Windows
+    case 'win32':  return 'COM7';                      // Windows
     case 'darwin': return '/dev/cu.usbserial-DN8FHMAG'; // macOS
     default:       return '/dev/ttyUSB0';               // Linux
   }
@@ -120,7 +120,7 @@ function transformSnapshot(flat) {
       flags: [],
       stacks: 6,
       cells_per_stack: 24,
-      ntcs_per_stack: 18,
+      ntcs_per_stack: 24,
     },
   };
 }
@@ -153,9 +153,9 @@ app.whenReady().then(() => {
     // BMS mock state (persists between calls for realistic drift)
     const BMS_STACKS = 6;
     const BMS_CELLS_PER_STACK = 24;
-    const BMS_NTCS_PER_STACK = 22;
+    const BMS_NTCS_PER_STACK = 24;
     const BMS_TOTAL_CELLS = BMS_STACKS * BMS_CELLS_PER_STACK;  // 144
-    const BMS_TOTAL_TEMPS = BMS_STACKS * BMS_NTCS_PER_STACK;   // 132
+    const BMS_TOTAL_TEMPS = BMS_STACKS * BMS_NTCS_PER_STACK;   // 144
 
     // Initialize base voltages and temps with slight per-cell variation
     const bmsCellVoltages = Array.from({ length: BMS_TOTAL_CELLS }, () =>
