@@ -64,10 +64,10 @@ const PACK_COLS = 12;
 const PACK_NTC_MAP = [
   0, null,  null, null, null, 1, 2, 3,  null, null, null, null,  // row 0
   null, null,  null, 4, 5, null, null, 6,  7, null, null, null,  // row 1
-  null, 8,  9, null, null, 10, null, null,  null, 11, 12, null,  // row 3
-  13, null,  null, 14, null, null, 15, null, null, null, null, 16,  // row 4
-  null, null, 17, null, null, 18, null, null, null, 19, 20, null,  // row 5
-  null, null, null, null, 21, null, null, null, 22, null, null, 23,  // row 6
+  null, 8,  9, null, null, 10, null, null,  null, 11, 12, null,  // row 2
+  13, null,  null, 14, null, null, 15, null, null, null, null, 16,  // row 3
+  null, null, 17, null, null, 18, null, null, null, 19, 20, null,  // row 4
+  null, null, null, null, 21, null, null, null, 22, null, null, 23,  // row 5
 ];
 let lastLayoutTemps = null;
 let activeStackIdx = 0;

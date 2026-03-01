@@ -405,9 +405,9 @@ app.whenReady().then(() => {
       const filename = path.join(logsDir, `faults_${stamp}.csv`);
 
       const rows = [
-        'timestamp,fault,status',
-        ...cleared.map(({ time, fault }) => `"${time}","${fault}","cleared"`),
-        ...active.map(fault => `"${now.toTimeString().slice(0, 12)}","${fault}","active at close"`),
+        'timestamp,fault',
+        ...cleared.map(({ time, fault }) => `"${time}","${fault}"`),
+        ...active.map(fault => `"${now.toTimeString().slice(0, 12)}","${fault}"`),
       ];
 
       if (rows.length > 1) {
