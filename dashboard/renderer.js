@@ -49,6 +49,14 @@ window.electronAPI.onExportDone((filename) => {
   alert(`✅ Data exported to ${filename}`);
 });
 
+// --- Auto-export faults on session close ---
+window.electronAPI.onRequestFaultExport(() => {
+  window.electronAPI.sendFaultData({
+    cleared: faultHistoryData,
+    active: currentErrors,
+  });
+});
+
 // --- Helper functions ---
 function createStatusDot(value, type = "boolean") {
   const span = document.createElement('span');

@@ -385,4 +385,41 @@ app.whenReady().then(() => {
     if (win && win.webContents) win.webContents.send('export-done', filename);
   });
 
+  // --- Auto-export fault log on session close ---
+  let faultsExported = false;
+
+  win.on('close', (event) => {
+    if (!faultsExported) {
+      event.preventDefault();
+      win.webContents.send('request-fault-export');
+    }
+  });
+
+  ipcMain.on('fault-export-data', (_event, { cleared = [], active = [] }) => {
+    try {
+      const logsDir = path.join(__dirname, 'logs');
+      fs.mkdirSync(logsDir, { recursive: true });
+
+      const now = new Date();
+      const stamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const filename = path.join(logsDir, `faults_${stamp}.csv`);
+
+      const rows = [
+        'timestamp,fault,status',
+        ...cleared.map(({ time, fault }) => `"${time}","${fault}","cleared"`),
+        ...active.map(fault => `"${now.toTimeString().slice(0, 12)}","${fault}","active at close"`),
+      ];
+
+      if (rows.length > 1) {
+        fs.writeFileSync(filename, rows.join('\n'));
+        console.log(`Fault log saved to ${filename}`);
+      }
+    } catch (err) {
+      console.error('Failed to save fault log:', err);
+    } finally {
+      faultsExported = true;
+      win.close();
+    }
+  });
+
 });

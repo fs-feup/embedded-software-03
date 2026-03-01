@@ -18,5 +18,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Receive export confirmation
   onExportDone: (callback) => {
     ipcRenderer.on('export-done', (event, filename) => callback(filename));
+  },
+
+  // Main requests fault data before closing
+  onRequestFaultExport: (callback) => {
+    ipcRenderer.on('request-fault-export', () => callback());
+  },
+
+  // Renderer sends fault data back to main
+  sendFaultData: (data) => {
+    ipcRenderer.send('fault-export-data', data);
   }
 });
