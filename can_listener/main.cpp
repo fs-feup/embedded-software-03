@@ -151,7 +151,62 @@ static void print_snapshot_json(const sensors::Snapshot& s)
     json_kv(std::cout, "cells_global_min", (int64_t)s.cells.global_min);
     json_kv(std::cout, "cells_global_min_valid", s.cells.global_min_valid);
     json_kv(std::cout, "cells_global_max", (int64_t)s.cells.global_max);
-    json_kv(std::cout, "cells_global_max_valid", s.cells.global_max_valid, true);
+    json_kv(std::cout, "cells_global_max_valid", s.cells.global_max_valid);
+
+    // ==== Per-board temperature summary ====
+    std::cout << "\"cells_board_min\":[";
+    for (uint8_t b = 0; b < sensors::NUM_BOARDS; ++b) {
+        std::cout << (int)s.cells.board_min[b];
+        if (b < sensors::NUM_BOARDS - 1) std::cout << ',';
+    }
+    std::cout << "],";
+
+    std::cout << "\"cells_board_max\":[";
+    for (uint8_t b = 0; b < sensors::NUM_BOARDS; ++b) {
+        std::cout << (int)s.cells.board_max[b];
+        if (b < sensors::NUM_BOARDS - 1) std::cout << ',';
+    }
+    std::cout << "],";
+
+    std::cout << "\"cells_board_avg\":[";
+    for (uint8_t b = 0; b < sensors::NUM_BOARDS; ++b) {
+        std::cout << (int)s.cells.board_avg[b];
+        if (b < sensors::NUM_BOARDS - 1) std::cout << ',';
+    }
+    std::cout << "],";
+
+    std::cout << "\"cells_board_valid\":[";
+    for (uint8_t b = 0; b < sensors::NUM_BOARDS; ++b) {
+        std::cout << jbool(s.cells.board_valid[b]);
+        if (b < sensors::NUM_BOARDS - 1) std::cout << ',';
+    }
+    std::cout << "],";
+
+    // ==== All individual cell temperatures (6 boards × 24 slots = 144 readings) ====
+    // Note: Only 18 NTCs per board; indices 18-23 padded with null for UI compatibility
+    constexpr uint8_t UI_NTCS_PER_BOARD = 24;
+    std::cout << "\"cells_all_temps\":[";
+    for (uint8_t b = 0; b < sensors::NUM_BOARDS; ++b) {
+        std::cout << '[';
+        for (uint8_t s_idx = 0; s_idx < UI_NTCS_PER_BOARD; ++s_idx) {
+            if (s_idx < sensors::NTC_SENSOR_COUNT) {
+                std::cout << (int)s.cells.all[b][s_idx];
+            } else {
+                std::cout << "null";
+            }
+            if (s_idx < UI_NTCS_PER_BOARD - 1) std::cout << ',';
+        }
+        std::cout << ']';
+        if (b < sensors::NUM_BOARDS - 1) std::cout << ',';
+    }
+    std::cout << "],";
+
+    std::cout << "\"cells_all_valid\":[";
+    for (uint8_t b = 0; b < sensors::NUM_BOARDS; ++b) {
+        std::cout << jbool(s.cells.all_valid[b]);
+        if (b < sensors::NUM_BOARDS - 1) std::cout << ',';
+    }
+    std::cout << "]";
 
     std::cout << "}\n";
 }

@@ -171,7 +171,7 @@ namespace sensors
         s.signals1.master_sdc_closed_valid = false;
         s.signals1.ts_on_valid = false;
         s.signals1.wd_ready_valid = false;
-
+        
         s.signals1.emergency_signal_valid = false;
         s.signals1.bms_dead_valid = false;
         s.signals1.ebs_engage_valid = false;

@@ -115,7 +115,7 @@ function transformSnapshot(flat) {
       cells_global_max: flat.cells_global_max ?? null,
       cells_global_max_valid: !!flat.cells_global_max_valid,
       cell_voltages: null,
-      temperatures: null,
+      temperatures: flat.cells_all_temps?.flat() ?? null,
       pack_current: null,
       flags: [],
       stacks: 6,
