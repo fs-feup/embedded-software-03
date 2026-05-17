@@ -22,7 +22,7 @@ const CAN_DEVICE = process.env.CAN_DEVICE || (() => {
 })();
 
 // Toggle mock mode manually (set to true to test UI without CAN adapter)
-const useMock = true;
+const useMock = false;
 
 // Transform flat C++ snapshot into the nested format the renderer expects
 function transformSnapshot(flat) {

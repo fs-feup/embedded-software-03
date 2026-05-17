@@ -24,7 +24,9 @@ namespace sensors
         std::string device; // ex: /dev/cu.usbserial-DN8FHMAG  or  COM3
         int baud = 115200;
 
-        std::string slcan_speed_cmd = "S7\r"; // 800 kbit
+        // SLCAN CAN bus speed: S4=125k (handcart), S7=800k (accumulator), S8=1M
+        // >>> TO TEST WITH HANDCART: change "S7" to "S4" <<<
+        std::string slcan_speed_cmd = "S4\r"; // TEMP: 125k for handcart testing (change back to S7 for accumulator)
 
         // Ativa timestamp A1
         bool enable_a1_timestamp = true;
